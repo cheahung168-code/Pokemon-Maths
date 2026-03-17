@@ -11,7 +11,6 @@
     
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/188/188987.png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/188/188987.png">
-
     <link rel="manifest" href="data:application/manifest+json,{'name':'Math-Mon Master','short_name':'MathMon','start_url':'.','display':'standalone','background_color':'#121212','theme_color':'#121212','icons':[{'src':'https://cdn-icons-png.flaticon.com/512/188/188987.png','sizes':'512x512','type':'image/png'}]}">
 
     <title>Math-Mon: Android Edition</title>
@@ -70,8 +69,8 @@
         #play-img { bottom: 10%; left: 5%; }
         .stat-card {
             position: absolute; background: rgba(240, 240, 240, 0.9); color: #333;
-            padding: 5px 10px; width: 150px; border: 2px solid #333;
-            border-radius: 8px; z-index: 6; font-size: 12px;
+            padding: 5px 10px; width: 140px; border: 2px solid #333;
+            border-radius: 8px; z-index: 6; font-size: 11px;
         }
         #opp-stats { top: 8%; left: 5%; }
         #play-stats { bottom: 12%; right: 5%; }
@@ -89,13 +88,22 @@
             background: #fff; color: #333; box-shadow: 0 4px 0 #999;
         }
         button.ans-btn:active { transform: translateY(2px); box-shadow: none; }
+        
+        /* THE FIX: LEVEL SELECTOR STYLING */
         #overlay {
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 100; text-align: center;
+            padding: 20px;
         }
-        .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; width: 90%; }
-        .lvl-btn { padding: 12px; font-size: 16px; background: #333; color: white; border: 2px solid white; border-radius: 8px; }
+        #overlay-content { width: 100%; }
+        .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; width: 100%; max-width: 400px; }
+        .lvl-btn { 
+            padding: 15px 5px; font-size: 18px; font-weight: bold; 
+            background: #444; color: #fff; border: 2px solid #fff; border-radius: 10px;
+        }
+        .lvl-btn:active { background: var(--android-blue); color: #000; }
+        
         .vfx { position: absolute; font-size: 60px; pointer-events: none; display: none; z-index: 20; }
         .burning { display: block; animation: fire-anim 0.5s forwards; }
         @keyframes fire-anim { 0%{transform:scale(1); opacity:1;} 100%{transform:scale(4); opacity:0;} }
@@ -116,14 +124,14 @@
         <div id="timer-bar"></div>
         <div id="overlay">
             <div id="overlay-content">
-                <h2 style="color:var(--android-blue)">SELECT LEVEL</h2>
+                <h2 style="color:var(--android-blue); margin:0;">SELECT LEVEL</h2>
                 <div class="level-grid" id="selector"></div>
             </div>
             <div id="trophy-box" style="display:none">
                 <div style="font-size:80px">🏆</div>
-                <h1 id="over-title">LEVEL COMPLETE!</h1>
-                <p id="over-sub"></p>
-                <button id="next-btn" onclick="startLevel()" style="background:var(--gold); padding:15px 40px; font-weight:bold; border-radius:30px; border:none; font-size:20px;">CONTINUE</button>
+                <h1 id="over-title" style="color:white">LEVEL CLEAR!</h1>
+                <p id="over-sub" style="color:white"></p>
+                <button id="next-btn" onclick="startLevel()" style="background:var(--gold); padding:15px 40px; font-weight:bold; border-radius:30px; border:none; font-size:20px; color:black;">CONTINUE</button>
             </div>
         </div>
         <div id="vfx" class="vfx">💥</div>
@@ -150,7 +158,7 @@
 </div>
 
 <script>
-    // --- SERVICE WORKER FOR PWA INSTALL ---
+    // --- SERVICE WORKER ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swCode = "self.addEventListener('fetch', function(e) {});";
@@ -188,7 +196,7 @@
         timerId: null, history: [], levelQuestions: new Set() 
     };
 
-    // UI Setup
+    // Build Selector
     const selector = document.getElementById('selector');
     for(let i=1; i<=20; i++) {
         const btn = document.createElement('button');
@@ -197,12 +205,14 @@
         selector.appendChild(btn);
     }
 
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
     function generateMath() {
         let a, b, op, qStr;
         const L = state.lvl;
         
         do {
-            op = Math.floor(Math.random() * 2); // 0: +, 1: -
+            op = Math.floor(Math.random() * 2); 
             if (L <= 2) { a = rand(0, 9); b = rand(0, 9); }
             else if (L <= 6) { a = rand(10, 99); b = rand(0, 9); }
             else if (L <= 10) { a = rand(10, 99); b = rand(10, 99); }
@@ -228,10 +238,9 @@
         });
     }
 
-    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
     function startLevel() {
         document.getElementById('overlay').style.display = 'none';
+        document.getElementById('overlay-content').style.display = 'none';
         document.getElementById('trophy-box').style.display = 'none';
         state.qIdx = 0; state.correct = 0; state.player.hp = 3; state.opp.hp = 3;
         state.history = []; state.levelQuestions.clear();
@@ -309,3 +318,17 @@
         document.getElementById('over-sub').innerText = `Final Score: ${state.correct}/10`;
         const res = win ? "SUCCESS" : "FAIL";
         setTimeout(() => {
+            let b = `Math Report: ${res}\nLvl: ${state.lvl-(win?1:0)}\nScore: ${state.correct}/10\n\n`;
+            state.history.forEach((h,i)=> b += `${i+1}. ${h.q}=${h.ans} (${h.correct?'V':'X'})\n`);
+            window.location.href = `mailto:dominic@famleung.com?subject=Math Report Lvl ${state.lvl-(win?1:0)}&body=${encodeURIComponent(b)}`;
+        }, 1500);
+    }
+
+    function checkEvo() {
+        if(state.lvl >= 12) state.player.id = 6;
+        else if(state.lvl >= 6) state.player.id = 5;
+        else state.player.id = 4;
+    }
+</script>
+</body>
+</html>
