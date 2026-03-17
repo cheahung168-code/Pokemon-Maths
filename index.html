@@ -7,14 +7,14 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Math-Mon">
-    <meta name="apple-mobile-web-app-title" content="Math-Mon">
     <meta name="theme-color" content="#121212">
-    <meta name="msapplication-navbutton-color" content="#121212">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="manifest" href="data:application/manifest+json,{'name':'Math-Mon Master','short_name':'MathMon','start_url':'.','display':'standalone','background_color':'#121212','theme_color':'#121212'}">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/188/188987.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/188/188987.png">
 
-    <title>Math-Mon: Master Logic</title>
+    <link rel="manifest" href="data:application/manifest+json,{'name':'Math-Mon Master','short_name':'MathMon','start_url':'.','display':'standalone','background_color':'#121212','theme_color':'#121212','icons':[{'src':'https://cdn-icons-png.flaticon.com/512/188/188987.png','sizes':'512x512','type':'image/png'}]}">
+
+    <title>Math-Mon: Android Edition</title>
     <style>
         :root {
             --pk-bg: #121212;
@@ -116,7 +116,7 @@
         <div id="timer-bar"></div>
         <div id="overlay">
             <div id="overlay-content">
-                <h2 style="color:var(--android-blue)">CHOOSE LEVEL</h2>
+                <h2 style="color:var(--android-blue)">SELECT LEVEL</h2>
                 <div class="level-grid" id="selector"></div>
             </div>
             <div id="trophy-box" style="display:none">
@@ -150,13 +150,12 @@
 </div>
 
 <script>
-    // --- SERVICE WORKER REGISTRATION (Needed for A2HS) ---
+    // --- SERVICE WORKER FOR PWA INSTALL ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        const swCode = "self.addEventListener('fetch', function(event) {});";
+        const swCode = "self.addEventListener('fetch', function(e) {});";
         const blob = new Blob([swCode], {type: 'text/javascript'});
-        const url = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(url);
+        navigator.serviceWorker.register(URL.createObjectURL(blob));
       });
     }
 
@@ -189,6 +188,7 @@
         timerId: null, history: [], levelQuestions: new Set() 
     };
 
+    // UI Setup
     const selector = document.getElementById('selector');
     for(let i=1; i<=20; i++) {
         const btn = document.createElement('button');
@@ -199,13 +199,16 @@
 
     function generateMath() {
         let a, b, op, qStr;
+        const L = state.lvl;
+        
         do {
-            op = Math.floor(Math.random() * 2);
-            if (state.lvl <= 2) { a = rand(0, 9); b = rand(0, 9); }
-            else if (state.lvl <= 6) { a = rand(10, 99); b = rand(0, 9); }
-            else if (state.lvl <= 10) { a = rand(10, 99); b = rand(10, 99); }
-            else if (state.lvl <= 13) { a = rand(100, 999); b = rand(10, 99); }
+            op = Math.floor(Math.random() * 2); // 0: +, 1: -
+            if (L <= 2) { a = rand(0, 9); b = rand(0, 9); }
+            else if (L <= 6) { a = rand(10, 99); b = rand(0, 9); }
+            else if (L <= 10) { a = rand(10, 99); b = rand(10, 99); }
+            else if (L <= 13) { a = rand(100, 999); b = rand(10, 99); }
             else { a = rand(100, 999); b = rand(100, 999); }
+
             if (op === 1 && a < b) [a, b] = [b, a];
             qStr = `${a}${op === 0 ? '+' : '-'}${b}`;
         } while (state.levelQuestions.has(qStr));
@@ -306,17 +309,3 @@
         document.getElementById('over-sub').innerText = `Final Score: ${state.correct}/10`;
         const res = win ? "SUCCESS" : "FAIL";
         setTimeout(() => {
-            let b = `Math Report: ${res}\nLvl: ${state.lvl-(win?1:0)}\nScore: ${state.correct}/10\n\n`;
-            state.history.forEach((h,i)=> b += `${i+1}. ${h.q}=${h.ans} (${h.correct?'V':'X'})\n`);
-            window.location.href = `mailto:dominic@famleung.com?subject=Math Report Lvl ${state.lvl-(win?1:0)}&body=${encodeURIComponent(b)}`;
-        }, 1500);
-    }
-
-    function checkEvo() {
-        if(state.lvl >= 12) state.player.id = 6;
-        else if(state.lvl >= 6) state.player.id = 5;
-        else state.player.id = 4;
-    }
-</script>
-</body>
-</html>
