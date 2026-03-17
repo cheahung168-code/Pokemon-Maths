@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Math-Mon">
+    <meta name="apple-mobile-web-app-title" content="Math-Mon">
+    <meta name="theme-color" content="#121212">
+    <meta name="msapplication-navbutton-color" content="#121212">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="manifest" href="data:application/manifest+json,{'name':'Math-Mon Master','short_name':'MathMon','start_url':'.','display':'standalone','background_color':'#121212','theme_color':'#121212'}">
+
+    <title>Math-Mon: Master Logic</title>
+    <style>
+        :root {
+            --pk-bg: #121212;
+            --field-bg: linear-gradient(#1e3c72, #2a5298);
+            --hp-green: #00ff00;
+            --gold: #ffd700;
+            --android-blue: #3DDC84;
+        }
+        * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: var(--pk-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            overflow: hidden;
+        }
+        #top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #222;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-bottom: 2px solid #444;
+        }
+        #game-box {
+            width: 100%;
+            max-width: 500px;
+            flex-grow: 1;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        #battle-screen {
+            flex: 1.5;
+            background: var(--field-bg);
+            position: relative;
+            overflow: hidden;
+        }
+        #timer-bar {
+            position: absolute; top:0; left:0; height:8px;
+            width: 100%; background: #ffcb05;
+            z-index: 30;
+        }
+        .sprite { width: 180px; position: absolute; transition: transform 0.2s; z-index: 5; }
+        #opp-img { top: 15%; right: 5%; }
+        #play-img { bottom: 10%; left: 5%; }
+        .stat-card {
+            position: absolute; background: rgba(240, 240, 240, 0.9); color: #333;
+            padding: 5px 10px; width: 150px; border: 2px solid #333;
+            border-radius: 8px; z-index: 6; font-size: 12px;
+        }
+        #opp-stats { top: 8%; left: 5%; }
+        #play-stats { bottom: 12%; right: 5%; }
+        .hp-outer { height: 8px; background: #ccc; border: 1px solid #333; margin-top: 3px; }
+        .hp-inner { height: 100%; background: var(--hp-green); width: 100%; transition: width 0.5s; }
+        #ui-panel { 
+            flex: 1; background: #eee; color: #333; 
+            padding: 15px; display: flex; flex-direction: column;
+            justify-content: center; border-top: 5px solid #333;
+        }
+        #question { font-size: 48px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #000; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 140px; }
+        button.ans-btn {
+            font-size: 24px; font-weight: bold; border: 3px solid #333; border-radius: 12px;
+            background: #fff; color: #333; box-shadow: 0 4px 0 #999;
+        }
+        button.ans-btn:active { transform: translateY(2px); box-shadow: none; }
+        #overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100; text-align: center;
+        }
+        .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; width: 90%; }
+        .lvl-btn { padding: 12px; font-size: 16px; background: #333; color: white; border: 2px solid white; border-radius: 8px; }
+        .vfx { position: absolute; font-size: 60px; pointer-events: none; display: none; z-index: 20; }
+        .burning { display: block; animation: fire-anim 0.5s forwards; }
+        @keyframes fire-anim { 0%{transform:scale(1); opacity:1;} 100%{transform:scale(4); opacity:0;} }
+        .shake { animation: shake 0.3s; }
+        @keyframes shake { 0%,100%{transform:translate(0,0);} 25%{transform:translate(-8px,8px);} 75%{transform:translate(8px,-8px);} }
+    </style>
+</head>
+<body>
+
+<div id="top-bar">
+    <div id="lvl-info">Math-Mon</div>
+    <div id="time-text">--</div>
+    <button onclick="location.reload()" style="padding:4px; font-size:10px;">Menu</button>
+</div>
+
+<div id="game-box">
+    <div id="battle-screen">
+        <div id="timer-bar"></div>
+        <div id="overlay">
+            <div id="overlay-content">
+                <h2 style="color:var(--android-blue)">CHOOSE LEVEL</h2>
+                <div class="level-grid" id="selector"></div>
+            </div>
+            <div id="trophy-box" style="display:none">
+                <div style="font-size:80px">🏆</div>
+                <h1 id="over-title">LEVEL COMPLETE!</h1>
+                <p id="over-sub"></p>
+                <button id="next-btn" onclick="startLevel()" style="background:var(--gold); padding:15px 40px; font-weight:bold; border-radius:30px; border:none; font-size:20px;">CONTINUE</button>
+            </div>
+        </div>
+        <div id="vfx" class="vfx">💥</div>
+        <div id="opp-stats" class="stat-card">
+            <b id="opp-name">FOE</b>
+            <div class="hp-outer"><div id="opp-hp" class="hp-inner"></div></div>
+        </div>
+        <img id="opp-img" class="sprite" src="">
+        <div id="play-stats" class="stat-card">
+            <b id="play-name">CHARMANDER</b> <small id="p-lv">Lv.1</small>
+            <div class="hp-outer"><div id="play-hp" class="hp-inner"></div></div>
+        </div>
+        <img id="play-img" class="sprite" src="">
+    </div>
+    <div id="ui-panel">
+        <div id="question">--</div>
+        <div class="grid">
+            <button class="ans-btn" onclick="handleAns(this)">?</button>
+            <button class="ans-btn" onclick="handleAns(this)">?</button>
+            <button class="ans-btn" onclick="handleAns(this)">?</button>
+            <button class="ans-btn" onclick="handleAns(this)">?</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- SERVICE WORKER REGISTRATION (Needed for A2HS) ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = "self.addEventListener('fetch', function(event) {});";
+        const blob = new Blob([swCode], {type: 'text/javascript'});
+        const url = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(url);
+      });
+    }
+
+    // --- AUDIO ENGINE ---
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    function playNote(f, t, d, v=0.1) {
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.type=t; o.frequency.setValueAtTime(f, ctx.currentTime);
+        g.gain.setValueAtTime(v, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+d);
+        o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+d);
+    }
+
+    const SFX = {
+        attack: () => playNote(150, 'square', 0.2),
+        damage: () => playNote(80, 'sawtooth', 0.3, 0.2),
+        correct: () => { playNote(523, 'square', 0.1); setTimeout(()=>playNote(659, 'square', 0.1), 80); },
+        victory: () => [523, 659, 783, 1046].forEach((f,i)=>setTimeout(()=>playNote(f, 'square', 0.4), i*150))
+    };
+
+    // --- GAME ENGINE ---
+    const levelTimes = { 
+        1:40, 2:35, 3:30, 4:30, 5:45, 6:40, 7:60, 8:55, 9:50, 10:45,
+        11:100, 12:90, 13:80, 14:120, 15:110, 16:100, 17:100, 18:90, 19:120, 20:100 
+    };
+
+    let state = { 
+        lvl: 1, qIdx: 0, correct: 0, ans: 0, 
+        player: { id: 4, hp: 3 }, opp: { id: 1, hp: 3 }, 
+        timerId: null, history: [], levelQuestions: new Set() 
+    };
+
+    const selector = document.getElementById('selector');
+    for(let i=1; i<=20; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i; btn.className = 'lvl-btn';
+        btn.onclick = () => { ctx.resume(); state.lvl = i; startLevel(); };
+        selector.appendChild(btn);
+    }
+
+    function generateMath() {
+        let a, b, op, qStr;
+        do {
+            op = Math.floor(Math.random() * 2);
+            if (state.lvl <= 2) { a = rand(0, 9); b = rand(0, 9); }
+            else if (state.lvl <= 6) { a = rand(10, 99); b = rand(0, 9); }
+            else if (state.lvl <= 10) { a = rand(10, 99); b = rand(10, 99); }
+            else if (state.lvl <= 13) { a = rand(100, 999); b = rand(10, 99); }
+            else { a = rand(100, 999); b = rand(100, 999); }
+            if (op === 1 && a < b) [a, b] = [b, a];
+            qStr = `${a}${op === 0 ? '+' : '-'}${b}`;
+        } while (state.levelQuestions.has(qStr));
+
+        state.levelQuestions.add(qStr);
+        state.ans = (op === 0) ? a + b : a - b;
+        document.getElementById('question').innerText = qStr;
+        
+        let opts = [state.ans];
+        while(opts.length < 4) {
+            let fake = state.ans + rand(-10, 10);
+            if(fake >= 0 && !opts.includes(fake)) opts.push(fake);
+        }
+        opts.sort(() => Math.random() - 0.5);
+        document.querySelectorAll('.ans-btn').forEach((btn, i) => { 
+            btn.innerText = opts[i]; btn.disabled = false; 
+        });
+    }
+
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    function startLevel() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('trophy-box').style.display = 'none';
+        state.qIdx = 0; state.correct = 0; state.player.hp = 3; state.opp.hp = 3;
+        state.history = []; state.levelQuestions.clear();
+        state.opp.id = [1, 7, 25, 133, 149, 150, 95, 130, 143, 68, 94][rand(0, 10)];
+        checkEvo(); updateSprites(); nextQ();
+    }
+
+    function nextQ() {
+        state.qIdx++;
+        if(state.qIdx > 10) { endBattle(true); return; }
+        document.getElementById('lvl-info').innerText = `Lvl:${state.lvl} (${state.qIdx}/10)`;
+        generateMath(); startTimer();
+    }
+
+    function startTimer() {
+        let max = levelTimes[state.lvl] || 100;
+        let left = max;
+        clearInterval(state.timerId);
+        state.timerId = setInterval(() => {
+            left--;
+            document.getElementById('time-text').innerText = left + "s";
+            document.getElementById('timer-bar').style.width = (left / max * 100) + "%";
+            if(left <= 0) { clearInterval(state.timerId); attack(false); }
+        }, 1000);
+    }
+
+    function handleAns(btn) {
+        clearInterval(state.timerId);
+        document.querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
+        const isRight = parseInt(btn.innerText) === state.ans;
+        state.history.push({q: document.getElementById('question').innerText, ans: btn.innerText, correct: isRight});
+        if(isRight) { state.correct++; SFX.correct(); if(navigator.vibrate) navigator.vibrate(40); } 
+        else { SFX.damage(); if(navigator.vibrate) navigator.vibrate([80, 40, 80]); }
+        attack(isRight);
+    }
+
+    function attack(isPlayer) {
+        const attacker = isPlayer ? 'play-img' : 'opp-img';
+        const target = isPlayer ? 'opp-img' : 'play-img';
+        document.getElementById(attacker).style.transform = isPlayer ? "translate(30px, -20px)" : "translate(-30px, 20px)";
+        setTimeout(() => {
+            SFX.attack();
+            document.getElementById(attacker).style.transform = "";
+            const vfx = document.getElementById('vfx');
+            const rect = document.getElementById(target).getBoundingClientRect();
+            const box = document.getElementById('battle-screen').getBoundingClientRect();
+            vfx.style.left = (rect.left - box.left + 50) + "px";
+            vfx.style.top = (rect.top - box.top + 20) + "px";
+            vfx.classList.remove('burning'); void vfx.offsetWidth; vfx.classList.add('burning');
+            document.getElementById(target).classList.add('shake');
+            if(isPlayer) state.opp.hp -= 0.5; else state.player.hp--;
+            updateSprites();
+            setTimeout(() => {
+                document.getElementById(target).classList.remove('shake');
+                if(state.player.hp <= 0) endBattle(false);
+                else nextQ();
+            }, 600);
+        }, 250);
+    }
+
+    function updateSprites() {
+        document.getElementById('play-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${state.player.id}.png`;
+        document.getElementById('opp-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${state.opp.id}.png`;
+        document.getElementById('p-lv').innerText = "Lv." + state.lvl;
+        document.getElementById('play-hp').style.width = (state.player.hp/3*100) + "%";
+        document.getElementById('opp-hp').style.width = (state.opp.hp/3*100) + "%";
+    }
+
+    function endBattle(win) {
+        clearInterval(state.timerId);
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('trophy-box').style.display = 'block';
+        if(win) { SFX.victory(); document.getElementById('over-title').innerText = "LEVEL CLEAR!"; state.lvl++; }
+        else { SFX.damage(); document.getElementById('over-title').innerText = "DEFEAT"; }
+        document.getElementById('over-sub').innerText = `Final Score: ${state.correct}/10`;
+        const res = win ? "SUCCESS" : "FAIL";
+        setTimeout(() => {
+            let b = `Math Report: ${res}\nLvl: ${state.lvl-(win?1:0)}\nScore: ${state.correct}/10\n\n`;
+            state.history.forEach((h,i)=> b += `${i+1}. ${h.q}=${h.ans} (${h.correct?'V':'X'})\n`);
+            window.location.href = `mailto:dominic@famleung.com?subject=Math Report Lvl ${state.lvl-(win?1:0)}&body=${encodeURIComponent(b)}`;
+        }, 1500);
+    }
+
+    function checkEvo() {
+        if(state.lvl >= 12) state.player.id = 6;
+        else if(state.lvl >= 6) state.player.id = 5;
+        else state.player.id = 4;
+    }
+</script>
+</body>
+</html>
