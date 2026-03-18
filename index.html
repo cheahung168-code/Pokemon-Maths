@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/188/188987.png">
     <link rel="manifest" href="data:application/manifest+json,{'name':'Math-Mon Master','short_name':'MathMon','start_url':'.','display':'standalone','background_color':'#121212','theme_color':'#121212','icons':[{'src':'https://cdn-icons-png.flaticon.com/512/188/188987.png','sizes':'512x512','type':'image/png'}]}">
 
-    <title>Math-Mon: Challenge Mode</title>
+    <title>Math-Mon: Mega Edition</title>
     <style>
         :root {
             --pk-bg: #121212;
@@ -44,7 +44,7 @@
         .sprite { width: 160px; position: absolute; z-index: 5; }
         #opp-img { top: 15%; right: 5%; }
         #play-img { bottom: 10%; left: 5%; }
-        #fireball { position: absolute; font-size: 40px; display: none; z-index: 50; transition: all 0.4s ease-in; }
+        #fireball { position: absolute; font-size: 40px; display: none; z-index: 200; transition: all 0.4s ease-in; }
 
         .stat-card {
             position: absolute; background: rgba(240, 240, 240, 0.9); color: #333;
@@ -63,15 +63,14 @@
         }
         #question { font-size: 42px; font-weight: bold; text-align: center; margin-bottom: 5px; color: #000; }
         
-        /* Layouts */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 140px; }
         #input-area { display: none; flex-direction: column; align-items: center; gap: 5px; }
         #user-input { 
             width: 80%; font-size: 32px; text-align: center; border: 3px solid #333; 
-            border-radius: 8px; background: #fff; padding: 5px; 
+            border-radius: 8px; background: #fff; padding: 5px; color: #000;
         }
-        .numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 100%; }
-        .num-btn { padding: 10px; font-size: 20px; font-weight: bold; background: #ddd; border: 2px solid #333; border-radius: 5px; }
+        .numpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 100%; }
+        .num-btn { padding: 12px; font-size: 20px; font-weight: bold; background: #ddd; border: 2px solid #333; border-radius: 5px; color: #000; }
         .num-btn.enter { background: var(--android-blue); grid-column: span 2; }
         .num-btn.del { background: var(--danger); color: white; }
 
@@ -79,12 +78,11 @@
             font-size: 24px; font-weight: bold; border: 3px solid #333; border-radius: 12px;
             background: #fff; color: #333; box-shadow: 0 4px 0 #999;
         }
-        button.ans-btn:active { transform: translateY(2px); box-shadow: none; }
         
         #overlay {
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 100; text-align: center; padding: 20px;
+            justify-content: center; align-items: center; z-index: 500; text-align: center; padding: 20px;
         }
         .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; width: 100%; }
         .lvl-btn { padding: 15px 5px; font-size: 18px; font-weight: bold; background: #444; color: #fff; border: 2px solid #fff; border-radius: 10px; }
@@ -109,18 +107,20 @@
     <div id="battle-screen">
         <div id="timer-bar"></div>
         <div id="fireball">🔥</div>
+        
         <div id="overlay">
             <div id="overlay-content">
                 <h2 style="color:var(--android-blue); margin:0;">CHOOSE BATTLE</h2>
                 <div class="level-grid" id="selector"></div>
             </div>
-            <div id="trophy-box" style="display:none">
+            <div id="victory-box" style="display:none">
                 <div style="font-size:80px">🏆</div>
                 <h1 id="over-title" style="color:white">LEVEL CLEAR!</h1>
                 <p id="over-sub" style="color:white"></p>
-                <button onclick="startLevel()" style="background:var(--gold); padding:15px 40px; font-weight:bold; border-radius:30px; border:none; font-size:20px;">CONTINUE</button>
+                <button onclick="startLevel()" style="background:var(--gold); padding:15px 40px; font-weight:bold; border-radius:30px; border:none; font-size:20px; color: #000;">CONTINUE</button>
             </div>
         </div>
+
         <div id="opp-stats" class="stat-card"><b>FOE</b><div class="hp-outer"><div id="opp-hp" class="hp-inner"></div></div></div>
         <img id="opp-img" class="sprite" src="">
         <div id="play-stats" class="stat-card"><b>CHARMANDER</b> <small id="p-lv">Lv.1</small><div class="hp-outer"><div id="play-hp" class="hp-inner"></div></div></div>
@@ -141,13 +141,14 @@
                 <button class="num-btn" onclick="press('1')">1</button>
                 <button class="num-btn" onclick="press('2')">2</button>
                 <button class="num-btn" onclick="press('3')">3</button>
+                <button class="num-btn del" onclick="press('C')">C</button>
                 <button class="num-btn" onclick="press('4')">4</button>
                 <button class="num-btn" onclick="press('5')">5</button>
                 <button class="num-btn" onclick="press('6')">6</button>
+                <button class="num-btn" onclick="press('0')">0</button>
                 <button class="num-btn" onclick="press('7')">7</button>
                 <button class="num-btn" onclick="press('8')">8</button>
                 <button class="num-btn" onclick="press('9')">9</button>
-                <button class="num-btn del" onclick="press('C')">C</button>
                 <button class="num-btn enter" onclick="handleAns(document.getElementById('user-input').value)">GO</button>
             </div>
         </div>
@@ -164,7 +165,7 @@
         g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+d);
         o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+d);
     }
-    function startBGM() { if(bgmOsc) return; bgmOsc = setInterval(() => playNote(261 + (state.lvl*5), 'triangle', 0.5, 0.02), 600); }
+    function startBGM() { if(bgmOsc) return; bgmOsc = setInterval(() => playNote(200 + (state.lvl*10), 'triangle', 0.4, 0.02), 600); }
 
     const SFX = {
         attack: () => playNote(150, 'square', 0.2),
@@ -183,9 +184,8 @@
         selector.appendChild(btn);
     }
 
-    function showMenu() { clearInterval(state.timerId); document.getElementById('overlay').style.display = 'flex'; document.getElementById('overlay-content').style.display = 'block'; document.getElementById('trophy-box').style.display = 'none'; }
-    function randNoZero(min, max) { let n = 0; while(n === 0) n = Math.floor(Math.random()*(max-min+1))+min; return n; }
-    function press(val) { const inp = document.getElementById('user-input'); if(val === 'C') inp.value = ''; else if(inp.value.length < 4) inp.value += val; }
+    function showMenu() { clearInterval(state.timerId); document.getElementById('overlay').style.display = 'flex'; document.getElementById('overlay-content').style.display = 'block'; document.getElementById('victory-box').style.display = 'none'; }
+    function press(val) { const inp = document.getElementById('user-input'); if(val === 'C') inp.value = ''; else if(inp.value.length < 5) inp.value += val; }
 
     function generateMath() {
         let a, b, op, qStr;
@@ -198,15 +198,15 @@
 
         do {
             op = Math.floor(Math.random() * 2); 
-            if (L <= 2) { a = randNoZero(1, 9); b = randNoZero(1, 9); }
-            else if (L <= 6) { a = randNoZero(11, 99); b = randNoZero(1, 9); }
-            else if (L <= 10) { a = randNoZero(11, 99); b = randNoZero(11, 99); }
-            else if (L <= 13) { a = randNoZero(111, 999); b = randNoZero(11, 99); }
-            else { a = randNoZero(111, 999); b = randNoZero(111, 999); }
+            if (L <= 2) { a = Math.floor(Math.random()*9)+1; b = Math.floor(Math.random()*9)+1; }
+            else if (L <= 6) { a = Math.floor(Math.random()*89)+11; b = Math.floor(Math.random()*9)+1; }
+            else if (L <= 10) { a = Math.floor(Math.random()*89)+11; b = Math.floor(Math.random()*89)+11; }
+            else if (L <= 13) { a = Math.floor(Math.random()*899)+101; b = Math.floor(Math.random()*89)+11; }
+            else { a = Math.floor(Math.random()*899)+101; b = Math.floor(Math.random()*899)+101; }
             if (op === 1 && a < b) [a, b] = [b, a];
             qStr = `${a}${op === 0 ? '+' : '-'}${b}`;
             state.ans = (op === 0) ? a + b : a - b;
-        } while (state.levelQuestions.has(qStr) || state.ans === 0);
+        } while (state.levelQuestions.has(qStr) || state.ans <= 0);
 
         state.levelQuestions.add(qStr);
         document.getElementById('question').innerText = qStr + (isChallenge ? " = ?" : "");
@@ -215,7 +215,7 @@
             let opts = [state.ans];
             const lastDigit = state.ans % 10;
             while(opts.length < 4) {
-                let fake = (state.ans > 10) ? (Math.floor(Math.random()*10)*10 + lastDigit) : randNoZero(1, 15);
+                let fake = (state.ans > 10) ? (Math.floor(Math.random()*10)*10 + lastDigit) : Math.floor(Math.random()*15)+1;
                 if(fake > 0 && !opts.includes(fake)) opts.push(fake);
             }
             opts.sort(() => Math.random() - 0.5);
@@ -227,7 +227,7 @@
         document.getElementById('overlay').style.display = 'none';
         state.qIdx = 0; state.correct = 0; state.player.hp = 3; state.opp.hp = 3;
         state.levelQuestions.clear();
-        state.opp.id = [1, 7, 25, 133, 149, 150, 95, 130, 143, 68, 94][randNoZero(0, 10)];
+        state.opp.id = [1, 7, 25, 133, 149, 150, 95, 130, 143, 68, 94][Math.floor(Math.random()*11)];
         checkEvo(); updateSprites(); nextQ();
     }
 
@@ -239,7 +239,7 @@
     }
 
     function startTimer() {
-        let max = (state.lvl % 5 === 0) ? 60 : 30; // More time for typing levels
+        let max = (state.lvl % 5 === 0) ? 45 : 20;
         let left = max;
         clearInterval(state.timerId);
         state.timerId = setInterval(() => {
@@ -297,15 +297,17 @@
     function endBattle(win) {
         clearInterval(state.timerId);
         document.getElementById('overlay').style.display = 'flex';
-        document.getElementById('trophy-box').style.display = 'block';
+        document.getElementById('overlay-content').style.display = 'none';
+        document.getElementById('victory-box').style.display = 'block';
         document.getElementById('over-title').innerText = win ? "LEVEL CLEAR!" : "DEFEAT";
         document.getElementById('over-sub').innerText = `Final Score: ${state.correct}/10`;
-        if(win) { SFX.victory(); state.lvl++; }
+        if(win) { SFX.victory(); state.lvl++; } else { SFX.damage(); }
     }
 
     function checkEvo() {
-        if(state.lvl >= 12) state.player.id = 6;
-        else if(state.lvl >= 6) state.player.id = 5;
+        if(state.lvl >= 15) state.player.id = 10035; // Mega Charizard Y
+        else if(state.lvl >= 10) state.player.id = 6;
+        else if(state.lvl >= 5) state.player.id = 5;
         else state.player.id = 4;
     }
 </script>
