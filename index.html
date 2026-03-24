@@ -3,88 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0a0a0a">
-    <title>Math-Strike: Pokémon Ace</title>
+    <title>Math-Strike: Aero-Pokemon</title>
     <style>
         :root { --hull-green: #0f0; --danger: #f00; --radar-bg: rgba(0, 15, 0, 0.9); }
-        * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * { touch-action: manipulation; box-sizing: border-box; }
         body {
             font-family: 'Courier New', monospace; background: #000; 
             display: flex; flex-direction: column; align-items: center;
             height: 100vh; margin: 0; color: #fff; overflow: hidden;
         }
-        body.day { --sky: #66ccff; }
-        body.night { --sky: #001a33; }
+        body.day { --sky: #4facfe; }
+        body.night { --sky: #090909; }
         #top-bar {
             width: 100%; display: flex; justify-content: space-between; align-items: center;
             background: #111; padding: 10px 15px; font-size: 14px; border-bottom: 2px solid #333;
         }
         #game-box { width: 100%; max-width: 500px; flex-grow: 1; background: #fff; display: flex; flex-direction: column; position: relative; }
         #battle-screen { flex: 1.8; position: relative; overflow: hidden; background-color: var(--sky); transition: background-color 2s; }
-        #tod-bg { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1; }
         #timer-bar { position: absolute; top:0; left:0; height:6px; width: 100%; background: #ffcc00; z-index: 30; }
-        .jet-container { position: absolute; width: 120px; height: 120px; z-index: 5; }
+        
+        .jet-container { position: absolute; width: 110px; height: 110px; z-index: 5; transition: transform 0.1s; }
         .jet-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.5)); }
-        #opp-pos { top: 15%; right: 10%; animation: patrolOpp 6s infinite ease-in-out; }
-        #play-pos { bottom: 15%; left: 10%; animation: patrolPlay 7s infinite ease-in-out; }
-        @keyframes patrolOpp { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-40px, 40px); } }
-        @keyframes patrolPlay { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(40px, -40px); } }
-        #missile { position: absolute; font-size: 30px; display: none; z-index: 200; transition: all 0.4s cubic-bezier(.47,0,.74,.71); }
+        #opp-pos { top: 15%; right: 10%; animation: patrolOpp 8s infinite ease-in-out; }
+        #play-pos { bottom: 15%; left: 10%; animation: patrolPlay 9s infinite ease-in-out; }
+        @keyframes patrolOpp { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-50px, 40px); } }
+        @keyframes patrolPlay { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(50px, -40px); } }
+        
+        /* LONGER MISSILE ANIMATION */
+        #missile { 
+            position: absolute; font-size: 28px; display: none; z-index: 200; 
+            transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); 
+            filter: drop-shadow(0 0 8px orange);
+        }
+
         .radar-card { position: absolute; background: var(--radar-bg); color: #0f0; padding: 5px 10px; width: 140px; border: 1px solid #0f0; border-radius: 4px; z-index: 10; font-size: 10px; }
         #opp-stats { top: 5%; left: 5%; } #play-stats { bottom: 5%; right: 5%; }
         .hull-outer { height: 4px; background: #222; margin-top: 4px; border: 1px solid #0f0; }
         .hull-inner { height: 100%; background: #0f0; width: 100%; transition: width 0.5s; }
+        
         #ui-panel { flex: 1.1; background: #111; padding: 10px; display: flex; flex-direction: column; justify-content: center; border-top: 4px solid #333; }
-        #question { font-size: 40px; font-weight: bold; text-align: center; margin-bottom: 8px; }
+        #question { font-size: 40px; font-weight: bold; text-align: center; margin-bottom: 8px; text-shadow: 0 0 10px #0f0; }
+        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 130px; }
-        .ans-btn { font-size: 24px; font-weight: bold; border: 2px solid #333; border-radius: 8px; background: #fff; color: #000; }
+        .ans-btn { font-size: 24px; font-weight: bold; border: 2px solid #0f0; border-radius: 8px; background: #222; color: #0f0; }
+        .ans-btn:active { background: #0f0; color: #000; }
+
         #input-area { display: none; flex-direction: column; align-items: center; gap: 5px; }
-        #user-input { width: 80%; font-size: 28px; text-align: center; border: 2px solid #0f0; background: #000; color: #0f0; }
+        #user-input { width: 85%; font-size: 28px; text-align: center; border: 2px solid #0f0; background: #000; color: #0f0; padding: 5px; margin-bottom: 5px; font-family: monospace; }
         .numpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; }
-        .num-btn { padding: 10px; background: #333; border: 1px solid #666; color: white; border-radius: 4px; }
+        .num-btn { padding: 14px; background: #333; border: 1px solid #666; color: white; border-radius: 4px; font-weight: bold; font-size: 18px; }
+        
         #overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 500; text-align: center; padding: 20px; }
         .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; width: 100%; }
         .lvl-btn { padding: 12px 5px; background: #111; color: #fff; border: 1px solid #0f0; border-radius: 4px; }
-        .shake { animation: shake 0.3s; }
-        @keyframes shake { 0%,100%{transform:translate(0,0);} 25%{transform:translate(-5px,5px);} 75%{transform:translate(5px,-5px);} }
+        .challenge-badge { border-color: #f00 !important; color: #f44; }
+        
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%,100%{transform:translate(0,0);} 25%{transform:translate(-8px,8px);} 75%{transform:translate(8px,-8px);} }
     </style>
 </head>
 <body class="day">
 <div id="top-bar">
-    <div id="lvl-info">Wingman: Strike-1</div>
+    <div id="lvl-info">Unit: Strike-Wing</div>
     <div id="time-text">--</div>
     <div class="top-btns">
-        <button onclick="showMenu()" style="padding:4px; font-size:10px; background:#333; color:white;">HANGAR</button>
-        <button onclick="resetSave()" style="padding:4px; font-size:10px; background:#333; color:white;">RESET</button>
+        <button onclick="showMenu()" style="padding:4px; font-size:10px; background:#333; color:white; border:1px solid #777;">HANGAR</button>
+        <button onclick="resetSave()" style="padding:4px; font-size:10px; background:#333; color:white; border:1px solid #777;">RESET</button>
     </div>
 </div>
+
 <div id="game-box">
     <div id="battle-screen">
         <div id="timer-bar"></div>
-        <svg id="tod-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <g class="day-vfx"><circle cx="85" cy="15" r="8" fill="#ffeb3b"/><circle cx="20" cy="20" r="5" fill="#fff" opacity="0.8"/></g>
-            <g class="night-vfx" style="display:none"><circle cx="85" cy="15" r="8" fill="#e0e0e0"/><circle cx="82" cy="12" r="8" fill="#001a33"/></g>
-        </svg>
         <div id="missile">🚀</div>
+        
         <div id="overlay">
             <div id="overlay-content">
-                <h2 style="color:#0f0;">MISSION SELECT</h2>
+                <h2 style="color:#0f0; letter-spacing: 2px;">SELECT AIRSPACE</h2>
                 <div class="level-grid" id="selector"></div>
             </div>
             <div id="result-box" style="display:none">
                 <div id="result-icon" style="font-size:60px"></div>
-                <h1 id="over-title" style="color:white;"></h1>
-                <p id="over-sub" style="color:#0f0;"></p>
-                <button id="cont-btn" onclick="startLevel()" style="background:#005500; color:white; padding:15px 40px; border:1px solid #0f0; border-radius:4px;">CONTINUE</button>
+                <h1 id="over-title" style="color:white; margin:10px 0;"></h1>
+                <p id="over-sub" style="color:#0f0; font-family: monospace;"></p>
+                <button id="cont-btn" onclick="startLevel()" style="background:#005500; color:white; padding:15px 40px; border:1px solid #0f0; border-radius:4px; font-weight:bold; cursor:pointer;">ENGAGE NEXT</button>
             </div>
         </div>
-        <div id="opp-stats" class="radar-card">HOSTILE: <span id="opp-name">FLANKER</span><div class="hull-outer"><div id="opp-hp" class="hull-inner"></div></div></div>
-        <div id="opp-pos" class="jet-container"><img id="opp-img" class="jet-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png"></div>
+
+        <div id="opp-stats" class="radar-card">BOGEY: <span id="opp-name">FLANKER</span><div class="hull-outer"><div id="opp-hp" class="hull-inner"></div></div></div>
+        <div id="opp-pos" class="jet-container"><img id="opp-img" class="jet-img" src=""></div>
+
         <div id="play-stats" class="radar-card">PLAYER: <span id="play-name">...</span><br>RANK: <span id="p-rank">LT</span><div class="hull-outer"><div id="play-hp" class="hull-inner"></div></div></div>
         <div id="play-pos" class="jet-container"><img id="play-img" class="jet-img" src=""></div>
     </div>
+
     <div id="ui-panel">
         <div id="question">--</div>
         <div class="grid" id="mc-area">
@@ -94,18 +106,17 @@
             <button class="ans-btn" onclick="handleAns(this.innerText)">?</button>
         </div>
         <div id="input-area">
-            <input type="text" id="user-input" readonly>
+            <input type="text" id="user-input" readonly placeholder="DATA LINK...">
             <div class="numpad">
                 <button class="num-btn" onclick="press('1')">1</button><button class="num-btn" onclick="press('2')">2</button><button class="num-btn" onclick="press('3')">3</button><button class="num-btn" style="background:#500" onclick="press('C')">C</button>
                 <button class="num-btn" onclick="press('4')">4</button><button class="num-btn" onclick="press('5')">5</button><button class="num-btn" onclick="press('6')">6</button><button class="num-btn" onclick="press('0')">0</button>
-                <button class="num-btn" onclick="press('7')">7</button><button class="num-btn" onclick="press('8')">8</button><button class="num-btn" onclick="press('9')">9</button><button class="num-btn" style="background:#050;grid-column:span 1" onclick="handleAns(document.getElementById('user-input').value)">GO</button>
+                <button class="num-btn" onclick="press('7')">7</button><button class="num-btn" onclick="press('8')">8</button><button class="num-btn" onclick="press('9')">9</button><button class="num-btn" style="background:#050;" onclick="handleAns(document.getElementById('user-input').value)">LOCK</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const POKEMON = [
         {lvl: 1, id: 25, name: "PIKACHU"}, {lvl: 3, id: 1, name: "BULBASAUR"}, {lvl: 5, id: 4, name: "CHARMANDER"},
         {lvl: 7, id: 7, name: "SQUIRTLE"}, {lvl: 9, id: 94, name: "GENGAR"}, {lvl: 11, id: 143, name: "SNORLAX"},
@@ -113,37 +124,55 @@
         {lvl: 19, id: 150, name: "MEWTWO"}, {lvl: 20, id: 384, name: "RAYQUAZA"}
     ];
 
+    let AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audio = null;
+    let bgm = null;
+
+    function initAudio() {
+        if (audio) return;
+        audio = new AudioCtx();
+        // Constant Engine Hum
+        bgm = audio.createOscillator();
+        let gain = audio.createGain();
+        bgm.type = 'triangle';
+        bgm.frequency.setValueAtTime(60, audio.currentTime);
+        gain.gain.setValueAtTime(0.02, audio.currentTime);
+        bgm.connect(gain); gain.connect(audio.destination);
+        bgm.start();
+    }
+
+    function playSfx(freq, type, dur, vol=0.1) {
+        if (!audio) return;
+        let osc = audio.createOscillator();
+        let g = audio.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audio.currentTime);
+        g.gain.setValueAtTime(vol, audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + dur);
+        osc.connect(g); g.connect(audio.destination);
+        osc.start(); osc.stop(audio.currentTime + dur);
+    }
+
     let savedLvl = parseInt(localStorage.getItem('mathStrikeLevel')) || 1;
     let state = { lvl: savedLvl, qIdx: 0, correct: 0, ans: 0, player: { hp: 3 }, opp: { hp: 3 }, timerId: null, levelQuestions: new Set() };
-
-    function playNote(f, t, d, v=0.05) {
-        const o=ctx.createOscillator(), g=ctx.createGain();
-        o.type=t; o.frequency.setValueAtTime(f, ctx.currentTime);
-        g.gain.setValueAtTime(v, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+d);
-        o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+d);
-    }
-
-    function playChampionAnthem() {
-        const notes = [261, 329, 392, 523, 392, 523, 659, 783, 1046];
-        notes.forEach((f, i) => setTimeout(() => playNote(f, 'square', 0.6, 0.1), i * 300));
-        setTimeout(() => notes.reverse().forEach((f, i) => setTimeout(() => playNote(f, 'square', 0.6, 0.1), i * 300)), 2700);
-    }
 
     function buildMenu() {
         const sel = document.getElementById('selector'); sel.innerHTML = '';
         for(let i=1; i<=20; i++) {
-            const btn = document.createElement('button'); btn.innerText = i; btn.className = 'lvl-btn';
+            const btn = document.createElement('button'); btn.innerText = i; 
+            btn.className = 'lvl-btn' + (i % 5 === 0 ? ' challenge-badge' : '');
             if (i > state.lvl) { btn.style.opacity = '0.3'; btn.disabled = true; }
-            btn.onclick = () => { ctx.resume(); state.lvl = i; startLevel(); };
+            btn.onclick = () => { initAudio(); state.lvl = i; startLevel(); };
             sel.appendChild(btn);
         }
     }
     buildMenu();
 
     function updateSprites() {
-        const pData = [...POKEMON].reverse().find(p => state.lvl >= p.lvl);
+        const pData = [...POKEMON].reverse().find(p => state.lvl >= p.lvl) || POKEMON[0];
         document.getElementById('play-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pData.id}.png`;
         document.getElementById('play-name').innerText = pData.name;
+        document.getElementById('opp-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${(151 - state.lvl)}.png`;
         document.getElementById('p-rank').innerText = state.lvl >= 20 ? "CHAMPION" : state.lvl >= 15 ? "ACE" : "PILOT";
         document.getElementById('play-hp').style.width = (state.player.hp/3*100) + "%";
         document.getElementById('opp-hp').style.width = (state.opp.hp/3*100) + "%";
@@ -170,14 +199,12 @@
 
         if(!isChallenge) {
             let opts = [state.ans];
-            const lastDigit = state.ans % 10;
             while(opts.length < 4) {
-                // TIGHT RANGE: ±10 from correct answer
                 let offset = (Math.floor(Math.random()*3) - 1) * 10;
                 if (offset === 0) offset = Math.random() > 0.5 ? 10 : -10;
                 let fake = state.ans + offset;
                 if(fake > 0 && !opts.includes(fake)) opts.push(fake);
-                else opts.push(state.ans + (opts.length * 10)); // Fallback
+                else opts.push(state.ans + (opts.length * 7)); 
             }
             opts.sort(() => Math.random() - 0.5);
             document.querySelectorAll('.ans-btn').forEach((btn, i) => { btn.innerText = opts[i]; btn.disabled = false; });
@@ -186,23 +213,48 @@
 
     function launchMissile(isPlayer) {
         const mis = document.getElementById('missile');
+        const screen = document.getElementById('battle-screen').getBoundingClientRect();
+        const startEl = document.getElementById(isPlayer ? 'play-pos' : 'opp-pos').getBoundingClientRect();
+        const endEl = document.getElementById(isPlayer ? 'opp-pos' : 'play-pos').getBoundingClientRect();
+
+        // Sound: Missile Ignition
+        playSfx(400, 'sawtooth', 0.8, 0.15);
+
         mis.style.display = 'block';
-        const start = document.getElementById(isPlayer ? 'play-pos' : 'opp-pos').getBoundingClientRect();
-        const end = document.getElementById(isPlayer ? 'opp-pos' : 'play-pos').getBoundingClientRect();
-        mis.style.left = start.left + 'px'; mis.style.top = start.top + 'px';
-        setTimeout(() => { mis.style.left = end.left + 'px'; mis.style.top = end.top + 'px'; }, 50);
+        mis.style.transition = 'none';
+        mis.style.left = (startEl.left - screen.left + 40) + 'px'; 
+        mis.style.top = (startEl.top - screen.top + 40) + 'px';
+        mis.style.transform = isPlayer ? "rotate(-45deg)" : "rotate(135deg)";
+
+        setTimeout(() => {
+            mis.style.transition = 'all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+            mis.style.left = (endEl.left - screen.left + 40) + 'px'; 
+            mis.style.top = (endEl.top - screen.top + 40) + 'px';
+        }, 50);
+
         setTimeout(() => {
             mis.style.display = 'none';
+            playSfx(80, 'square', 0.5, 0.2); // Explosion Sound
+            const target = isPlayer ? 'opp-pos' : 'play-pos';
+            document.getElementById(target).classList.add('shake');
             if(isPlayer) state.opp.hp -= 0.5; else state.player.hp--;
             updateSprites();
-            if(state.player.hp <= 0) endBattle(false); else nextQ();
-        }, 450);
+            
+            setTimeout(() => {
+                document.getElementById(target).classList.remove('shake');
+                if(state.player.hp <= 0) endBattle(false); else nextQ();
+            }, 500);
+        }, 850);
     }
 
     function handleAns(val) {
-        if(!val) return; clearInterval(state.timerId);
+        if(!val) return; 
+        clearInterval(state.timerId);
         const isRight = parseInt(val) === state.ans;
-        if(isRight) state.correct++; 
+        if(isRight) {
+            state.correct++; 
+            playSfx(800, 'sine', 0.1, 0.1); // Correct ping
+        }
         launchMissile(isRight);
     }
 
@@ -210,6 +262,8 @@
         document.getElementById('overlay').style.display = 'none';
         state.qIdx = 0; state.correct = 0; state.player.hp = 3; state.opp.hp = 3;
         state.levelQuestions.clear(); updateSprites(); nextQ();
+        // Update Time of Day
+        document.body.className = (new Date().getHours() > 6 && new Date().getHours() < 19) ? 'day' : 'night';
     }
 
     function nextQ() {
@@ -220,10 +274,11 @@
     }
 
     function startTimer() {
-        let left = 20; clearInterval(state.timerId);
+        let max = (state.lvl % 5 === 0) ? 35 : 20;
+        let left = max; clearInterval(state.timerId);
         state.timerId = setInterval(() => {
             left--; document.getElementById('time-text').innerText = left + "s";
-            document.getElementById('timer-bar').style.width = (left/20*100) + "%";
+            document.getElementById('timer-bar').style.width = (left/max*100) + "%";
             if(left <= 0) { clearInterval(state.timerId); launchMissile(false); }
         }, 1000);
     }
@@ -241,21 +296,22 @@
             if(state.lvl === 20) {
                 icon.innerText = "👑";
                 document.getElementById('over-title').innerText = "GRAND CHAMPION";
-                playChampionAnthem();
-            } else { playNote(800, 'sine', 0.5); }
+                // Champion Anthem
+                [261, 329, 392, 523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playSfx(f, 'square', 0.5, 0.1), i * 200));
+            } else { playSfx(600, 'sine', 0.5); }
             if(state.lvl >= savedLvl) { savedLvl++; localStorage.setItem('mathStrikeLevel', savedLvl); }
             state.lvl++;
         } else {
-            icon.innerText = "⚠️"; // No trophy for defeat
-            document.getElementById('over-title').innerText = "MISSION FAILED";
-            playNote(100, 'sawtooth', 0.5);
+            icon.innerText = "⚠️"; 
+            document.getElementById('over-title').innerText = "UNIT DOWN";
+            playSfx(100, 'sawtooth', 0.8, 0.2);
         }
-        document.getElementById('over-sub').innerText = `ENEMIES DOWN: ${state.correct}/10`;
+        document.getElementById('over-sub').innerText = `ENEMIES NEUTRALIZED: ${state.correct}/10`;
     }
 
     function showMenu() { clearInterval(state.timerId); buildMenu(); document.getElementById('overlay').style.display = 'flex'; document.getElementById('overlay-content').style.display = 'block'; document.getElementById('result-box').style.display = 'none'; }
-    function press(v) { const i = document.getElementById('user-input'); if(v==='C') i.value=''; else i.value+=v; }
-    function resetSave() { localStorage.clear(); location.reload(); }
+    function press(v) { const i = document.getElementById('user-input'); if(v==='C') i.value=''; else if(i.value.length < 5) i.value+=v; }
+    function resetSave() { if(confirm("Wipe flight records?")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
