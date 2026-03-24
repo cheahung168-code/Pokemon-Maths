@@ -3,130 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Math-Mon">
-    <meta name="theme-color" content="#121212">
-    
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/188/188987.png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/188/188987.png">
-    <link rel="manifest" href="data:application/manifest+json,{'name':'Math-Mon Master','short_name':'MathMon','start_url':'.','display':'standalone','background_color':'#121212','theme_color':'#121212','icons':[{'src':'https://cdn-icons-png.flaticon.com/512/188/188987.png','sizes':'512x512','type':'image/png'}]}">
-
-    <title>Math-Mon: Mega Edition</title>
+    <meta name="theme-color" content="#0a0a0a">
+    <title>Math-Strike: Pokémon Ace</title>
     <style>
-        :root {
-            --pk-bg: #121212;
-            --field-bg: linear-gradient(#1e3c72, #2a5298);
-            --hp-green: #00ff00;
-            --gold: #ffd700;
-            --android-blue: #3DDC84;
-            --danger: #ff4444;
-        }
+        :root { --hull-green: #0f0; --danger: #f00; --radar-bg: rgba(0, 15, 0, 0.9); }
         * { touch-action: manipulation; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background: var(--pk-bg);
+            font-family: 'Courier New', monospace; background: #000; 
             display: flex; flex-direction: column; align-items: center;
-            height: 100vh; margin: 0; color: white; overflow: hidden;
+            height: 100vh; margin: 0; color: #fff; overflow: hidden;
         }
+        body.day { --sky: #66ccff; }
+        body.night { --sky: #001a33; }
         #top-bar {
             width: 100%; display: flex; justify-content: space-between; align-items: center;
-            background: #222; padding: 10px 15px; font-size: 14px; border-bottom: 2px solid #444;
+            background: #111; padding: 10px 15px; font-size: 14px; border-bottom: 2px solid #333;
         }
-        .top-btns { display: flex; gap: 5px; }
-        #game-box {
-            width: 100%; max-width: 500px; flex-grow: 1;
-            background: #fff; display: flex; flex-direction: column; position: relative;
-        }
-        #battle-screen { flex: 1.5; background: var(--field-bg); position: relative; overflow: hidden; }
-        #timer-bar { position: absolute; top:0; left:0; height:8px; width: 100%; background: #ffcb05; z-index: 30; }
-        .sprite { width: 160px; position: absolute; z-index: 5; }
-        #opp-img { top: 15%; right: 5%; }
-        #play-img { bottom: 10%; left: 5%; }
-        #fireball { position: absolute; font-size: 40px; display: none; z-index: 200; transition: all 0.4s ease-in; }
-
-        .stat-card {
-            position: absolute; background: rgba(240, 240, 240, 0.9); color: #333;
-            padding: 5px 10px; width: 140px; border: 2px solid #333;
-            border-radius: 8px; z-index: 6; font-size: 11px;
-        }
-        #opp-stats { top: 8%; left: 5%; }
-        #play-stats { bottom: 12%; right: 5%; }
-        .hp-outer { height: 8px; background: #ccc; border: 1px solid #333; margin-top: 3px; }
-        .hp-inner { height: 100%; background: var(--hp-green); width: 100%; transition: width 0.5s; }
-        
-        #ui-panel { 
-            flex: 1.2; background: #eee; color: #333; 
-            padding: 10px; display: flex; flex-direction: column;
-            justify-content: center; border-top: 5px solid #333;
-        }
-        #question { font-size: 42px; font-weight: bold; text-align: center; margin-bottom: 5px; color: #000; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 140px; }
+        #game-box { width: 100%; max-width: 500px; flex-grow: 1; background: #fff; display: flex; flex-direction: column; position: relative; }
+        #battle-screen { flex: 1.8; position: relative; overflow: hidden; background-color: var(--sky); transition: background-color 2s; }
+        #tod-bg { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1; }
+        #timer-bar { position: absolute; top:0; left:0; height:6px; width: 100%; background: #ffcc00; z-index: 30; }
+        .jet-container { position: absolute; width: 120px; height: 120px; z-index: 5; }
+        .jet-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.5)); }
+        #opp-pos { top: 15%; right: 10%; animation: patrolOpp 6s infinite ease-in-out; }
+        #play-pos { bottom: 15%; left: 10%; animation: patrolPlay 7s infinite ease-in-out; }
+        @keyframes patrolOpp { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-40px, 40px); } }
+        @keyframes patrolPlay { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(40px, -40px); } }
+        #missile { position: absolute; font-size: 30px; display: none; z-index: 200; transition: all 0.4s cubic-bezier(.47,0,.74,.71); }
+        .radar-card { position: absolute; background: var(--radar-bg); color: #0f0; padding: 5px 10px; width: 140px; border: 1px solid #0f0; border-radius: 4px; z-index: 10; font-size: 10px; }
+        #opp-stats { top: 5%; left: 5%; } #play-stats { bottom: 5%; right: 5%; }
+        .hull-outer { height: 4px; background: #222; margin-top: 4px; border: 1px solid #0f0; }
+        .hull-inner { height: 100%; background: #0f0; width: 100%; transition: width 0.5s; }
+        #ui-panel { flex: 1.1; background: #111; padding: 10px; display: flex; flex-direction: column; justify-content: center; border-top: 4px solid #333; }
+        #question { font-size: 40px; font-weight: bold; text-align: center; margin-bottom: 8px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 130px; }
+        .ans-btn { font-size: 24px; font-weight: bold; border: 2px solid #333; border-radius: 8px; background: #fff; color: #000; }
         #input-area { display: none; flex-direction: column; align-items: center; gap: 5px; }
-        #user-input { 
-            width: 80%; font-size: 32px; text-align: center; border: 3px solid #333; 
-            border-radius: 8px; background: #fff; padding: 5px; color: #000;
-        }
-        .numpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 100%; }
-        .num-btn { padding: 12px; font-size: 20px; font-weight: bold; background: #ddd; border: 2px solid #333; border-radius: 5px; color: #000; }
-        .num-btn.enter { background: var(--android-blue); grid-column: span 2; }
-        .num-btn.del { background: var(--danger); color: white; }
-
-        button.ans-btn {
-            font-size: 24px; font-weight: bold; border: 3px solid #333; border-radius: 12px;
-            background: #fff; color: #333; box-shadow: 0 4px 0 #999;
-        }
-        
-        #overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 500; text-align: center; padding: 20px;
-        }
+        #user-input { width: 80%; font-size: 28px; text-align: center; border: 2px solid #0f0; background: #000; color: #0f0; }
+        .numpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; }
+        .num-btn { padding: 10px; background: #333; border: 1px solid #666; color: white; border-radius: 4px; }
+        #overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 500; text-align: center; padding: 20px; }
         .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; width: 100%; }
-        .lvl-btn { padding: 15px 5px; font-size: 18px; font-weight: bold; background: #444; color: #fff; border: 2px solid #fff; border-radius: 10px; }
-        .challenge-badge { background: var(--danger) !important; color: white; }
-        
+        .lvl-btn { padding: 12px 5px; background: #111; color: #fff; border: 1px solid #0f0; border-radius: 4px; }
         .shake { animation: shake 0.3s; }
-        @keyframes shake { 0%,100%{transform:translate(0,0);} 25%{transform:translate(-8px,8px);} 75%{transform:translate(8px,-8px);} }
+        @keyframes shake { 0%,100%{transform:translate(0,0);} 25%{transform:translate(-5px,5px);} 75%{transform:translate(5px,-5px);} }
     </style>
 </head>
-<body>
-
+<body class="day">
 <div id="top-bar">
-    <div id="lvl-info">Math-Mon</div>
+    <div id="lvl-info">Wingman: Strike-1</div>
     <div id="time-text">--</div>
     <div class="top-btns">
-        <button onclick="showMenu()" style="padding:4px; font-size:10px;">Levels</button>
-        <button onclick="location.reload()" style="padding:4px; font-size:10px;">Reset</button>
+        <button onclick="showMenu()" style="padding:4px; font-size:10px; background:#333; color:white;">HANGAR</button>
+        <button onclick="resetSave()" style="padding:4px; font-size:10px; background:#333; color:white;">RESET</button>
     </div>
 </div>
-
 <div id="game-box">
     <div id="battle-screen">
         <div id="timer-bar"></div>
-        <div id="fireball">🔥</div>
-        
+        <svg id="tod-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <g class="day-vfx"><circle cx="85" cy="15" r="8" fill="#ffeb3b"/><circle cx="20" cy="20" r="5" fill="#fff" opacity="0.8"/></g>
+            <g class="night-vfx" style="display:none"><circle cx="85" cy="15" r="8" fill="#e0e0e0"/><circle cx="82" cy="12" r="8" fill="#001a33"/></g>
+        </svg>
+        <div id="missile">🚀</div>
         <div id="overlay">
             <div id="overlay-content">
-                <h2 style="color:var(--android-blue); margin:0;">CHOOSE BATTLE</h2>
+                <h2 style="color:#0f0;">MISSION SELECT</h2>
                 <div class="level-grid" id="selector"></div>
             </div>
-            <div id="victory-box" style="display:none">
-                <div style="font-size:80px">🏆</div>
-                <h1 id="over-title" style="color:white">LEVEL CLEAR!</h1>
-                <p id="over-sub" style="color:white"></p>
-                <button onclick="startLevel()" style="background:var(--gold); padding:15px 40px; font-weight:bold; border-radius:30px; border:none; font-size:20px; color: #000;">CONTINUE</button>
+            <div id="result-box" style="display:none">
+                <div id="result-icon" style="font-size:60px"></div>
+                <h1 id="over-title" style="color:white;"></h1>
+                <p id="over-sub" style="color:#0f0;"></p>
+                <button id="cont-btn" onclick="startLevel()" style="background:#005500; color:white; padding:15px 40px; border:1px solid #0f0; border-radius:4px;">CONTINUE</button>
             </div>
         </div>
-
-        <div id="opp-stats" class="stat-card"><b>FOE</b><div class="hp-outer"><div id="opp-hp" class="hp-inner"></div></div></div>
-        <img id="opp-img" class="sprite" src="">
-        <div id="play-stats" class="stat-card"><b>CHARMANDER</b> <small id="p-lv">Lv.1</small><div class="hp-outer"><div id="play-hp" class="hp-inner"></div></div></div>
-        <img id="play-img" class="sprite" src="">
+        <div id="opp-stats" class="radar-card">HOSTILE: <span id="opp-name">FLANKER</span><div class="hull-outer"><div id="opp-hp" class="hull-inner"></div></div></div>
+        <div id="opp-pos" class="jet-container"><img id="opp-img" class="jet-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png"></div>
+        <div id="play-stats" class="radar-card">PLAYER: <span id="play-name">...</span><br>RANK: <span id="p-rank">LT</span><div class="hull-outer"><div id="play-hp" class="hull-inner"></div></div></div>
+        <div id="play-pos" class="jet-container"><img id="play-img" class="jet-img" src=""></div>
     </div>
-
     <div id="ui-panel">
         <div id="question">--</div>
         <div class="grid" id="mc-area">
@@ -136,20 +94,11 @@
             <button class="ans-btn" onclick="handleAns(this.innerText)">?</button>
         </div>
         <div id="input-area">
-            <input type="text" id="user-input" readonly placeholder="?">
+            <input type="text" id="user-input" readonly>
             <div class="numpad">
-                <button class="num-btn" onclick="press('1')">1</button>
-                <button class="num-btn" onclick="press('2')">2</button>
-                <button class="num-btn" onclick="press('3')">3</button>
-                <button class="num-btn del" onclick="press('C')">C</button>
-                <button class="num-btn" onclick="press('4')">4</button>
-                <button class="num-btn" onclick="press('5')">5</button>
-                <button class="num-btn" onclick="press('6')">6</button>
-                <button class="num-btn" onclick="press('0')">0</button>
-                <button class="num-btn" onclick="press('7')">7</button>
-                <button class="num-btn" onclick="press('8')">8</button>
-                <button class="num-btn" onclick="press('9')">9</button>
-                <button class="num-btn enter" onclick="handleAns(document.getElementById('user-input').value)">GO</button>
+                <button class="num-btn" onclick="press('1')">1</button><button class="num-btn" onclick="press('2')">2</button><button class="num-btn" onclick="press('3')">3</button><button class="num-btn" style="background:#500" onclick="press('C')">C</button>
+                <button class="num-btn" onclick="press('4')">4</button><button class="num-btn" onclick="press('5')">5</button><button class="num-btn" onclick="press('6')">6</button><button class="num-btn" onclick="press('0')">0</button>
+                <button class="num-btn" onclick="press('7')">7</button><button class="num-btn" onclick="press('8')">8</button><button class="num-btn" onclick="press('9')">9</button><button class="num-btn" style="background:#050;grid-column:span 1" onclick="handleAns(document.getElementById('user-input').value)">GO</button>
             </div>
         </div>
     </div>
@@ -157,159 +106,156 @@
 
 <script>
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    let bgmOsc = null;
-    function playNote(f, t, d, v=0.1) {
+    const POKEMON = [
+        {lvl: 1, id: 25, name: "PIKACHU"}, {lvl: 3, id: 1, name: "BULBASAUR"}, {lvl: 5, id: 4, name: "CHARMANDER"},
+        {lvl: 7, id: 7, name: "SQUIRTLE"}, {lvl: 9, id: 94, name: "GENGAR"}, {lvl: 11, id: 143, name: "SNORLAX"},
+        {lvl: 13, id: 448, name: "LUCARIO"}, {lvl: 15, id: 130, name: "GYARADOS"}, {lvl: 17, id: 149, name: "DRAGONITE"},
+        {lvl: 19, id: 150, name: "MEWTWO"}, {lvl: 20, id: 384, name: "RAYQUAZA"}
+    ];
+
+    let savedLvl = parseInt(localStorage.getItem('mathStrikeLevel')) || 1;
+    let state = { lvl: savedLvl, qIdx: 0, correct: 0, ans: 0, player: { hp: 3 }, opp: { hp: 3 }, timerId: null, levelQuestions: new Set() };
+
+    function playNote(f, t, d, v=0.05) {
         const o=ctx.createOscillator(), g=ctx.createGain();
         o.type=t; o.frequency.setValueAtTime(f, ctx.currentTime);
-        g.gain.setValueAtTime(v, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+d);
+        g.gain.setValueAtTime(v, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+d);
         o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+d);
     }
-    function startBGM() { if(bgmOsc) return; bgmOsc = setInterval(() => playNote(200 + (state.lvl*10), 'triangle', 0.4, 0.02), 600); }
 
-    const SFX = {
-        attack: () => playNote(150, 'square', 0.2),
-        damage: () => playNote(80, 'sawtooth', 0.3, 0.2),
-        correct: () => { playNote(523, 'square', 0.1); setTimeout(()=>playNote(659, 'square', 0.1), 80); },
-        victory: () => [523, 659, 783, 1046].forEach((f,i)=>setTimeout(()=>playNote(f, 'square', 0.4), i*150))
-    };
-
-    let state = { lvl: 1, qIdx: 0, correct: 0, ans: 0, player: { id: 4, hp: 3 }, opp: { id: 1, hp: 3 }, timerId: null, levelQuestions: new Set() };
-
-    const selector = document.getElementById('selector');
-    for(let i=1; i<=20; i++) {
-        const btn = document.createElement('button');
-        btn.innerText = i; btn.className = 'lvl-btn' + (i % 5 === 0 ? ' challenge-badge' : '');
-        btn.onclick = () => { ctx.resume(); startBGM(); state.lvl = i; startLevel(); };
-        selector.appendChild(btn);
+    function playChampionAnthem() {
+        const notes = [261, 329, 392, 523, 392, 523, 659, 783, 1046];
+        notes.forEach((f, i) => setTimeout(() => playNote(f, 'square', 0.6, 0.1), i * 300));
+        setTimeout(() => notes.reverse().forEach((f, i) => setTimeout(() => playNote(f, 'square', 0.6, 0.1), i * 300)), 2700);
     }
 
-    function showMenu() { clearInterval(state.timerId); document.getElementById('overlay').style.display = 'flex'; document.getElementById('overlay-content').style.display = 'block'; document.getElementById('victory-box').style.display = 'none'; }
-    function press(val) { const inp = document.getElementById('user-input'); if(val === 'C') inp.value = ''; else if(inp.value.length < 5) inp.value += val; }
+    function buildMenu() {
+        const sel = document.getElementById('selector'); sel.innerHTML = '';
+        for(let i=1; i<=20; i++) {
+            const btn = document.createElement('button'); btn.innerText = i; btn.className = 'lvl-btn';
+            if (i > state.lvl) { btn.style.opacity = '0.3'; btn.disabled = true; }
+            btn.onclick = () => { ctx.resume(); state.lvl = i; startLevel(); };
+            sel.appendChild(btn);
+        }
+    }
+    buildMenu();
+
+    function updateSprites() {
+        const pData = [...POKEMON].reverse().find(p => state.lvl >= p.lvl);
+        document.getElementById('play-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pData.id}.png`;
+        document.getElementById('play-name').innerText = pData.name;
+        document.getElementById('p-rank').innerText = state.lvl >= 20 ? "CHAMPION" : state.lvl >= 15 ? "ACE" : "PILOT";
+        document.getElementById('play-hp').style.width = (state.player.hp/3*100) + "%";
+        document.getElementById('opp-hp').style.width = (state.opp.hp/3*100) + "%";
+    }
 
     function generateMath() {
         let a, b, op, qStr;
-        const L = state.lvl;
-        const isChallenge = (L % 5 === 0);
-        
+        const isChallenge = (state.lvl % 5 === 0);
         document.getElementById('mc-area').style.display = isChallenge ? 'none' : 'grid';
         document.getElementById('input-area').style.display = isChallenge ? 'flex' : 'none';
         document.getElementById('user-input').value = '';
 
         do {
-            op = Math.floor(Math.random() * 2); 
-            if (L <= 2) { a = Math.floor(Math.random()*9)+1; b = Math.floor(Math.random()*9)+1; }
-            else if (L <= 6) { a = Math.floor(Math.random()*89)+11; b = Math.floor(Math.random()*9)+1; }
-            else if (L <= 10) { a = Math.floor(Math.random()*89)+11; b = Math.floor(Math.random()*89)+11; }
-            else if (L <= 13) { a = Math.floor(Math.random()*899)+101; b = Math.floor(Math.random()*89)+11; }
-            else { a = Math.floor(Math.random()*899)+101; b = Math.floor(Math.random()*899)+101; }
+            op = Math.random() > 0.5 ? 0 : 1;
+            if (state.lvl <= 5) { a = Math.floor(Math.random()*15)+1; b = Math.floor(Math.random()*15)+1; }
+            else { a = Math.floor(Math.random()*90)+10; b = Math.floor(Math.random()*90)+10; }
             if (op === 1 && a < b) [a, b] = [b, a];
+            state.ans = op === 0 ? a + b : a - b;
             qStr = `${a}${op === 0 ? '+' : '-'}${b}`;
-            state.ans = (op === 0) ? a + b : a - b;
         } while (state.levelQuestions.has(qStr) || state.ans <= 0);
 
         state.levelQuestions.add(qStr);
-        document.getElementById('question').innerText = qStr + (isChallenge ? " = ?" : "");
-        
+        document.getElementById('question').innerText = qStr;
+
         if(!isChallenge) {
             let opts = [state.ans];
             const lastDigit = state.ans % 10;
             while(opts.length < 4) {
-                let fake = (state.ans > 10) ? (Math.floor(Math.random()*10)*10 + lastDigit) : Math.floor(Math.random()*15)+1;
+                // TIGHT RANGE: ±10 from correct answer
+                let offset = (Math.floor(Math.random()*3) - 1) * 10;
+                if (offset === 0) offset = Math.random() > 0.5 ? 10 : -10;
+                let fake = state.ans + offset;
                 if(fake > 0 && !opts.includes(fake)) opts.push(fake);
+                else opts.push(state.ans + (opts.length * 10)); // Fallback
             }
             opts.sort(() => Math.random() - 0.5);
             document.querySelectorAll('.ans-btn').forEach((btn, i) => { btn.innerText = opts[i]; btn.disabled = false; });
         }
     }
 
+    function launchMissile(isPlayer) {
+        const mis = document.getElementById('missile');
+        mis.style.display = 'block';
+        const start = document.getElementById(isPlayer ? 'play-pos' : 'opp-pos').getBoundingClientRect();
+        const end = document.getElementById(isPlayer ? 'opp-pos' : 'play-pos').getBoundingClientRect();
+        mis.style.left = start.left + 'px'; mis.style.top = start.top + 'px';
+        setTimeout(() => { mis.style.left = end.left + 'px'; mis.style.top = end.top + 'px'; }, 50);
+        setTimeout(() => {
+            mis.style.display = 'none';
+            if(isPlayer) state.opp.hp -= 0.5; else state.player.hp--;
+            updateSprites();
+            if(state.player.hp <= 0) endBattle(false); else nextQ();
+        }, 450);
+    }
+
+    function handleAns(val) {
+        if(!val) return; clearInterval(state.timerId);
+        const isRight = parseInt(val) === state.ans;
+        if(isRight) state.correct++; 
+        launchMissile(isRight);
+    }
+
     function startLevel() {
         document.getElementById('overlay').style.display = 'none';
         state.qIdx = 0; state.correct = 0; state.player.hp = 3; state.opp.hp = 3;
-        state.levelQuestions.clear();
-        state.opp.id = [1, 7, 25, 133, 149, 150, 95, 130, 143, 68, 94][Math.floor(Math.random()*11)];
-        checkEvo(); updateSprites(); nextQ();
+        state.levelQuestions.clear(); updateSprites(); nextQ();
     }
 
     function nextQ() {
         state.qIdx++;
-        if(state.qIdx > 10) { endBattle(true); return; }
-        document.getElementById('lvl-info').innerText = `Lvl:${state.lvl} (${state.qIdx}/10)`;
+        if(state.qIdx > 10) return endBattle(true);
+        document.getElementById('lvl-info').innerText = `Msn:${state.lvl} (${state.qIdx}/10)`;
         generateMath(); startTimer();
     }
 
     function startTimer() {
-        let max = (state.lvl % 5 === 0) ? 45 : 20;
-        let left = max;
-        clearInterval(state.timerId);
+        let left = 20; clearInterval(state.timerId);
         state.timerId = setInterval(() => {
-            left--;
-            document.getElementById('time-text').innerText = left + "s";
-            document.getElementById('timer-bar').style.width = (left / max * 100) + "%";
-            if(left <= 0) { clearInterval(state.timerId); launchFireball(false); }
+            left--; document.getElementById('time-text').innerText = left + "s";
+            document.getElementById('timer-bar').style.width = (left/20*100) + "%";
+            if(left <= 0) { clearInterval(state.timerId); launchMissile(false); }
         }, 1000);
-    }
-
-    function handleAns(val) {
-        if(!val) return;
-        clearInterval(state.timerId);
-        document.querySelectorAll('.ans-btn').forEach(b => b.disabled = true);
-        const isRight = parseInt(val) === state.ans;
-        if(isRight) { state.correct++; SFX.correct(); } else { SFX.damage(); }
-        launchFireball(isRight);
-    }
-
-    function launchFireball(isPlayer) {
-        const ball = document.getElementById('fireball');
-        const pRect = document.getElementById('play-img').getBoundingClientRect();
-        const oRect = document.getElementById('opp-img').getBoundingClientRect();
-        const screen = document.getElementById('battle-screen').getBoundingClientRect();
-
-        const startX = isPlayer ? (pRect.left - screen.left + 50) : (oRect.left - screen.left + 50);
-        const startY = isPlayer ? (pRect.top - screen.top) : (oRect.top - screen.top);
-        const endX = isPlayer ? (oRect.left - screen.left + 50) : (pRect.left - screen.left + 50);
-        const endY = isPlayer ? (oRect.top - screen.top) : (pRect.top - screen.top);
-
-        ball.style.display = 'block'; ball.style.left = startX + 'px'; ball.style.top = startY + 'px';
-        setTimeout(() => { SFX.attack(); ball.style.left = endX + 'px'; ball.style.top = endY + 'px'; }, 50);
-
-        setTimeout(() => {
-            ball.style.display = 'none';
-            const target = isPlayer ? 'opp-img' : 'play-img';
-            document.getElementById(target).classList.add('shake');
-            if(isPlayer) state.opp.hp -= 0.5; else state.player.hp--;
-            updateSprites();
-            setTimeout(() => {
-                document.getElementById(target).classList.remove('shake');
-                if(state.player.hp <= 0) endBattle(false); else nextQ();
-            }, 400);
-        }, 450);
-    }
-
-    function updateSprites() {
-        document.getElementById('play-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${state.player.id}.png`;
-        document.getElementById('opp-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${state.opp.id}.png`;
-        document.getElementById('p-lv').innerText = "Lv." + state.lvl;
-        document.getElementById('play-hp').style.width = (state.player.hp/3*100) + "%";
-        document.getElementById('opp-hp').style.width = (state.opp.hp/3*100) + "%";
     }
 
     function endBattle(win) {
         clearInterval(state.timerId);
         document.getElementById('overlay').style.display = 'flex';
         document.getElementById('overlay-content').style.display = 'none';
-        document.getElementById('victory-box').style.display = 'block';
-        document.getElementById('over-title').innerText = win ? "LEVEL CLEAR!" : "DEFEAT";
-        document.getElementById('over-sub').innerText = `Final Score: ${state.correct}/10`;
-        if(win) { SFX.victory(); state.lvl++; } else { SFX.damage(); }
+        const box = document.getElementById('result-box'); box.style.display = 'block';
+        const icon = document.getElementById('result-icon');
+        
+        if(win) {
+            icon.innerText = "🏆";
+            document.getElementById('over-title').innerText = "MISSION SUCCESS";
+            if(state.lvl === 20) {
+                icon.innerText = "👑";
+                document.getElementById('over-title').innerText = "GRAND CHAMPION";
+                playChampionAnthem();
+            } else { playNote(800, 'sine', 0.5); }
+            if(state.lvl >= savedLvl) { savedLvl++; localStorage.setItem('mathStrikeLevel', savedLvl); }
+            state.lvl++;
+        } else {
+            icon.innerText = "⚠️"; // No trophy for defeat
+            document.getElementById('over-title').innerText = "MISSION FAILED";
+            playNote(100, 'sawtooth', 0.5);
+        }
+        document.getElementById('over-sub').innerText = `ENEMIES DOWN: ${state.correct}/10`;
     }
 
-    function checkEvo() {
-        if(state.lvl >= 15) state.player.id = 10035; // Mega Charizard Y
-        else if(state.lvl >= 10) state.player.id = 6;
-        else if(state.lvl >= 5) state.player.id = 5;
-        else state.player.id = 4;
-    }
+    function showMenu() { clearInterval(state.timerId); buildMenu(); document.getElementById('overlay').style.display = 'flex'; document.getElementById('overlay-content').style.display = 'block'; document.getElementById('result-box').style.display = 'none'; }
+    function press(v) { const i = document.getElementById('user-input'); if(v==='C') i.value=''; else i.value+=v; }
+    function resetSave() { localStorage.clear(); location.reload(); }
 </script>
 </body>
 </html>
